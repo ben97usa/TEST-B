@@ -679,6 +679,55 @@
 
 </div>
 
+<script>
+    const answered = JSON.parse(localStorage.getItem('quizAnswers') || '{}');
+
+    window.onload = function () {
+      Object.keys(answered).forEach(qid => {
+        const answer = answered[qid];
+        const block = document.getElementById(qid);
+        if (!block) return;
+        const options = block.querySelectorAll('.option');
+        options.forEach(opt => {
+          const optVal = opt.getAttribute('data-opt');
+          if (optVal === answer.selected) {
+            opt.classList.add(answer.selected === answer.correct ? 'correct' : 'wrong');
+            opt.querySelector('.icon').textContent = answer.selected === answer.correct ? '✅' : '❌';
+          }
+        });
+      });
+    };
+
+    function checkAnswer(el, qid, correct) {
+      if (answered[qid]) return;
+      const selected = el.getAttribute('data-opt');
+      const icon = el.querySelector('.icon');
+      if (selected === correct) {
+        el.classList.add('correct');
+        icon.textContent = '✅';
+      } else {
+        el.classList.add('wrong');
+        icon.textContent = '❌';
+      }
+      answered[qid] = { selected, correct };
+      localStorage.setItem('quizAnswers', JSON.stringify(answered));
+    }
+
+    function saveProgress() {
+      localStorage.setItem('quizAnswers', JSON.stringify(answered));
+      document.getElementById('status-msg').textContent = '✅ Progress saved!';
+      setTimeout(() => {
+        document.getElementById('status-msg').textContent = '';
+      }, 2000);
+    }
+
+    function resetQuiz() {
+      if (!confirm('Are you sure you want to reset all your answers and start over?')) return;
+      localStorage.removeItem('quizAnswers');
+      location.reload();
+    }
+
+
 function submitQuiz() {
   const totalQuestions = 85; // total number of questions
   let correctCount = 0;
@@ -721,3 +770,6 @@ function submitQuiz() {
     🧮 Your score: <strong>${scorePercent}%</strong>
   `;
 }
+  </script>
+</body>
+</html>
